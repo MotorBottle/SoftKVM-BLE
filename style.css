@@ -1,0 +1,46 @@
+#hotkeyInterface {
+    display: block;
+    position: fixed;
+    bottom: 28px;
+    left: 28px;
+    width: 800px;  /* 增加宽度以适应新的内容 */
+    height: 500px; /* 增加高度以适应新的内容 */
+    border: 1px solid #ccc;
+    padding: 10px;
+    background: white;
+    z-index: 10000;
+    border-radius: 8px;
+}
+#keyList li, #clearSelectionButton, #sendKeysButton {
+    list-style: none; /* Remove default list style */
+    padding: 10px; /* Padding inside each 'button' */
+    margin: 5px; /* Margin between buttons */
+    background-color: #f0f0f0; /* Slightly grey background */
+    border: 0.5px solid #ccc; /* Grey border */
+    border-radius: 4px; /* Rounded corners */
+    text-align: center; /* Center text horizontally */
+    cursor: pointer; /* Pointer cursor on hover */
+    width: 68px;
+    height: 40px;
+    box-sizing: border-box; /* Include padding and border in the width */
+    display: inline-block; /* Allows items to sit side by side */
+}
+#clearSelectionButton, #sendKeysButton {
+    display: inline-block;
+}
+#keyList {
+    padding: 0; /* Remove padding from the list */
+    width: 100%; /* Ensure the list takes full width of its container */
+}
+#selectedKeys {
+    height: 85px;
+}
+#hotkeyInterface h3 {
+    margin-left: 6px;
+    margin-top: 16px;
+    margin-bottom: 20px;
+}
+#messageArea {
+    margin-top: 20px;
+    color: red;
+}
