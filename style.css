@@ -10,7 +10,7 @@ body {
 }
 
 #setup, #operate {
-    width: 440px;
+    width: 460px;
     margin: 5px 0px;
     padding: 6px;
     background: white;
@@ -20,7 +20,7 @@ body {
 }
 
 #hotkeyInterface {
-    width: 440px;
+    width: 460px;
     height: 192px;
     padding: 6px;
     background: white;
@@ -46,11 +46,11 @@ body {
     cursor: pointer; /* Pointer cursor on hover */
     box-sizing: border-box; /* Include padding and border in the width */
     display: inline-block; /* Allows items to sit side by side */
-    font-size: 11px;
+    font-size: 12px;
 }
 
 #keyList li, #clearSelectionButton, #sendKeysButton {
-    width: 72px;
+    width: 76px;
     height: 36px;
 }
 

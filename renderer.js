@@ -65,30 +65,33 @@ document.addEventListener('DOMContentLoaded', () => {
         // Add your method to send keys to the client machine
     }
 
-    document.addEventListener('keydown', function(event) {
-        if (event.altKey && event.key === 's') {
-            toggleInterface();
-        }
-    });
 
-    function toggleInterface() {
-        // Check if the document is in pointer lock
-        if (document.pointerLockElement) {
-            // Exit pointer lock
-            document.exitPointerLock();
-            // Wait for the pointer lock to be released before showing the interface
-            showInterface();
-        } else {
-            // Directly toggle interface visibility if not in pointer lock
-            showInterface();
-        }
-    }
 
-    function showInterface() {
-        let displayStyle = window.getComputedStyle(interfaceDiv).display;
-        clearSelection();
-        interfaceDiv.style.display = (displayStyle === 'none' || displayStyle === '') ? 'block' : 'none';
-    }
+    // No need as the interface is the main Window
+    // document.addEventListener('keydown', function(event) {
+    //     if (event.altKey && event.key === 's') {
+    //         toggleInterface();
+    //     }
+    // });
+
+    // function toggleInterface() {
+    //     // Check if the document is in pointer lock
+    //     if (document.pointerLockElement) {
+    //         // Exit pointer lock
+    //         document.exitPointerLock();
+    //         // Wait for the pointer lock to be released before showing the interface
+    //         showInterface();
+    //     } else {
+    //         // Directly toggle interface visibility if not in pointer lock
+    //         showInterface();
+    //     }
+    // }
+
+    // function showInterface() {
+    //     let displayStyle = window.getComputedStyle(interfaceDiv).display;
+    //     clearSelection();
+    //     interfaceDiv.style.display = (displayStyle === 'none' || displayStyle === '') ? 'block' : 'none';
+    // }
 
     /*-------------------------全屏切换---------------------------*/
     fullScreenButton.addEventListener('click', () => {
@@ -124,6 +127,16 @@ document.addEventListener('DOMContentLoaded', () => {
     /*-------------------------控制部分---------------------------*/
     let mouseController = new MouseController();
     let keyboardController = new KeyboardController(captureButton);
+
+    // 加载保存的设置
+    const savedCtrlMetaToggle = localStorage.getItem('ctrlMetaToggle') === 'true';
+    const savedInvertScrollToggle = localStorage.getItem('invertScrollToggle') === 'true';
+
+    ctrlMetaToggle.checked = savedCtrlMetaToggle;
+    invertScrollToggle.checked = savedInvertScrollToggle;
+
+    keyboardController.setSwapMetaCtrl(savedCtrlMetaToggle);
+    mouseController.setInvertScroll(savedInvertScrollToggle);
     
     captureButton.addEventListener('click', () => {
         const now = Date.now();
@@ -201,15 +214,21 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Handle toggles
+    // 监听 Ctrl/Meta 切换复选框状态变化
     ctrlMetaToggle.addEventListener('change', () => {
-        // Handle Ctrl/Meta toggle change
+        const swapMetaCtrl = ctrlMetaToggle.checked;
+        keyboardController.setSwapMetaCtrl(swapMetaCtrl);
+        localStorage.setItem('ctrlMetaToggle', swapMetaCtrl); // 保存设置
+        console.log(`Swap Meta and Ctrl: ${swapMetaCtrl}`);
     });
 
+    // 监听滚轮反转复选框状态变化
     invertScrollToggle.addEventListener('change', () => {
-        // Handle scroll inversion toggle change
+        const invertScroll = invertScrollToggle.checked;
+        mouseController.setInvertScroll(invertScroll);
+        localStorage.setItem('invertScrollToggle', invertScroll); // 保存设置
+        console.log(`Invert Scroll: ${invertScroll}`);
     });
-
 });
 
 function updateFullScreenButton() {
@@ -228,6 +247,7 @@ class MouseController {
         this.buttonMask = 0; // Mask of buttons to send to the serial port
         this.throttledMouseMove = this.throttle(this.handleMouseMove.bind(this), 2);
         this.throttledWheelMove = this.throttle(this.handleWheelMove.bind(this), 8);
+        this.invertScroll = false;
         this.bindMouseHandlers();
     }
 
@@ -301,7 +321,7 @@ class MouseController {
     }
 
     handleWheelMove(event) {
-        const wheelMove = Math.sign(event.deltaY) * -1;
+        const wheelMove = Math.sign(event.deltaY) * (this.invertScroll ? 1 : -1);
         electronAPI.sendMouseEvent(this.buttonMask, 0, 0, wheelMove);
     }
 
@@ -317,7 +337,7 @@ class MouseController {
         for (let i = 0; i < count; i++) {
             setTimeout(() => {
                 electronAPI.sendMouseEvent(buttonMask, 0, 0, 0);
-            }, i * delay);
+            }, delay);
         }
     }
 
@@ -339,6 +359,10 @@ class MouseController {
             }
         };
     }
+
+    setInvertScroll(invert) {
+        this.invertScroll = invert;
+    }
 }
 
 class KeyboardController {
@@ -347,6 +371,7 @@ class KeyboardController {
         this.isLocked = false;
         this.modifiers = 0; // Modifier bitmask
         this.pressedKeys = new Set(); // Tracks pressed keys
+        this.swapMetaCtrl = false;
         this.init();
     }
 
@@ -358,6 +383,7 @@ class KeyboardController {
     handleKeyDown(event) {
         event.preventDefault(); // Prevent default to avoid triggering other shortcuts
         if (event.altKey && event.ctrlKey) {
+            electronAPI.sendKeyboardEvent(0x00, []);
             this.unlockKeyboard(); // Directly call unlockKeyboard
             return; // Skip further processing
         }
@@ -399,7 +425,7 @@ class KeyboardController {
         for (let i = 0; i < count; i++) {
             setTimeout(() => {
                 electronAPI.sendKeyboardEvent(modifiers, keyCodes);
-            }, i * delay);
+            }, delay);
         }
     }
 
@@ -409,7 +435,17 @@ class KeyboardController {
 
     updateModifiers(event, isKeyDown) {
         let mask = 0;
-        switch (event.code) {
+        let code = event.code;
+
+        // Swap Meta and Ctrl if the flag is set
+        if (this.swapMetaCtrl) {
+            if (code === 'ControlLeft') code = 'MetaLeft';
+            else if (code === 'ControlRight') code = 'MetaRight';
+            else if (code === 'MetaLeft') code = 'ControlLeft';
+            else if (code === 'MetaRight') code = 'ControlRight';
+        }
+
+        switch (code) {
             case 'ControlLeft': mask = 0x01; break;
             case 'ControlRight': mask = 0x10; break;
             case 'ShiftLeft': mask = 0x02; break;
@@ -466,6 +502,10 @@ class KeyboardController {
         if (this.isLocked) {
             this.unlockKeyboard();
         }
+    }
+
+    setSwapMetaCtrl(swap) {
+        this.swapMetaCtrl = swap;
     }
 }
 
