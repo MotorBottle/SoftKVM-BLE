@@ -5,7 +5,7 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div style="clear: both; margin: 20px 0;">
+    <div id="setup">
         <label for="serialPortSelect">串口选择:</label>
         <select id="serialPortSelect">
             <!-- Dynamically populated -->
@@ -15,18 +15,18 @@
         <label for="invertScrollToggle">反转滚轮方向:</label>
         <input type="checkbox" id="invertScrollToggle">
     </div>
-    <div style="clear: both; margin: 20px 0;">
+    <div id="operate">
         <button id="fullScreenButton">Full Screen Mode</button>
         <button id="captureButton">Capture</button>
     </div>
     <div id="hotkeyInterface">
-        <div style="width: 160px; float: left; margin: 0 24px;">
+        <div class="section">
             <h3>请选择按键</h3>
             <ul id="keyList">
                 <!-- Dynamically populated -->
             </ul>
         </div>
-        <div style="width: 160px; float: right; margin: 0 24px;">
+        <div class="section">
             <h3>待发送的组合</h3>
             <ul id="selectedKeys">
                 <!-- Keys will be listed here -->

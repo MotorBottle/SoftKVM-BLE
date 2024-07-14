@@ -1,17 +1,41 @@
+body {
+    margin: 0;
+    padding: 5px 0px 0px 0px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    background: white;
+}
+
+#setup, #operate {
+    width: 440px;
+    margin: 5px 0px;
+    padding: 6px;
+    background: white;
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+}
+
 #hotkeyInterface {
-    display: block;
-    position: fixed;
-    bottom: 28px;
-    left: 28px;
-    width: 800px;  /* 增加宽度以适应新的内容 */
-    height: 500px; /* 增加高度以适应新的内容 */
-    border: 1px solid #ccc;
-    padding: 10px;
+    width: 440px;
+    height: 192px;
+    padding: 6px;
     background: white;
     z-index: 10000;
     border-radius: 8px;
+    display: flex;
+    justify-content: space-between;
 }
-#keyList li, #clearSelectionButton, #sendKeysButton {
+
+.section {
+    width: 180px;
+    margin: 0 24px;
+}
+
+#keyList li, #clearSelectionButton, #sendKeysButton, #fullScreenButton, #captureButton {
     list-style: none; /* Remove default list style */
     padding: 10px; /* Padding inside each 'button' */
     margin: 5px; /* Margin between buttons */
@@ -20,26 +44,35 @@
     border-radius: 4px; /* Rounded corners */
     text-align: center; /* Center text horizontally */
     cursor: pointer; /* Pointer cursor on hover */
-    width: 68px;
-    height: 40px;
     box-sizing: border-box; /* Include padding and border in the width */
     display: inline-block; /* Allows items to sit side by side */
+    font-size: 11px;
 }
+
+#keyList li, #clearSelectionButton, #sendKeysButton {
+    width: 72px;
+    height: 36px;
+}
+
 #clearSelectionButton, #sendKeysButton {
     display: inline-block;
 }
+
 #keyList {
+    margin: 12px 0px;
     padding: 0; /* Remove padding from the list */
     width: 100%; /* Ensure the list takes full width of its container */
 }
+
 #selectedKeys {
-    height: 85px;
+    height: 72px;
 }
+
 #hotkeyInterface h3 {
-    margin-left: 6px;
-    margin-top: 16px;
-    margin-bottom: 20px;
+    padding: 5px 6px;
+    margin: 0;
 }
+
 #messageArea {
     margin-top: 20px;
     color: red;
