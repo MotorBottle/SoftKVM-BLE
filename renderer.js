@@ -4,7 +4,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const sendKeysButton = document.getElementById('sendKeysButton');
     const keys = ['Esc', 'Ctrl', 'Alt/Opt', 'Tab', 'Shift', 'Win/Cmd'];
     const keyList = document.getElementById('keyList');
-    const selectedKeys = [];
     const fullScreenButton = document.getElementById('fullScreenButton');
     const captureButton = document.getElementById('captureButton');
     const serialPortSelect = document.getElementById('serialPortSelect');
@@ -12,20 +11,64 @@ document.addEventListener('DOMContentLoaded', () => {
     const invertScrollToggle = document.getElementById('invertScrollToggle');
     let lastUnlockTime = 0;
 
+    const selectedKeys = [];
+    let modifiers = 0; // 待发送的修饰键
+    let keyListToSend = []; // 待发送的键列表
+
     // Populate key list
     keys.forEach(key => {
         let li = document.createElement('li');
         li.textContent = key;
-        li.onclick = () => toggleSelectKey(key);
+        li.onclick = () => handleKeySelection(key);
         keyList.appendChild(li);
     });
 
-    function toggleSelectKey(key) {
-        const keyIndex = selectedKeys.indexOf(key);
-        if (keyIndex === -1) {
-            selectedKeys.push(key); // Add key if not already selected
-        } else {
-            selectedKeys.splice(keyIndex, 1); // Remove key if already selected
+    function handleKeySelection(key) {
+        switch (key) {
+            case 'Ctrl':
+                if (!selectedKeys.includes('Ctrl')) {
+                    modifiers |= 0x01;
+                    selectedKeys.push('Ctrl');
+                }
+                break;
+            case 'Shift':
+                if (!selectedKeys.includes('Shift')) {
+                    modifiers |= 0x02;
+                    selectedKeys.push('Shift');
+                }
+                break;
+            case 'Alt/Opt':
+                if (!selectedKeys.includes('Alt/Opt')) {
+                    modifiers |= 0x04;
+                    selectedKeys.push('Alt/Opt');
+                }
+                break;
+            case 'Win/Cmd':
+                if (!selectedKeys.includes('Win/Cmd')) {
+                    modifiers |= 0x08;
+                    selectedKeys.push('Win/Cmd');
+                }
+                break;
+            case 'Esc':
+                if (!selectedKeys.includes('Esc')) {
+                    selectedKeys.push('Esc');
+                    keyListToSend.push(0x29);
+                }
+                break;
+            case 'Tab':
+                if (!selectedKeys.includes('Tab')) {
+                    selectedKeys.push('Tab');
+                    keyListToSend.push(0x2B);
+                }
+                break;
+            default:
+                // 非修饰键，添加到待发送的键列表
+                const keyCode = HID_USAGE_ID_MAP[`Key${key.toUpperCase()}`];
+                if (keyCode && !keyListToSend.includes(keyCode)) {
+                    selectedKeys.push(key);
+                    keyListToSend.push(keyCode);
+                }
+                break;
         }
         updateSelectedKeysDisplay();
     }
@@ -40,32 +83,54 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    document.getElementById('hotkeyInterface').addEventListener('click', (event) => {
-        if (interfaceDiv.style.display !== "block") {
-            return; // Do nothing if the interface is not displayed
-        }
+    // document.getElementById('hotkeyInterface').addEventListener('click', (event) => {
+    //     const target = event.target; // The clicked element
 
-        const target = event.target; // The clicked element
+    //     if (target.id === 'clearSelectionButton') {
+    //         clearSelection();
+    //     } else if (target.id === 'sendKeysButton') {
+    //         sendKeys();
+    //         clearSelection();
+    //     }
+    // });
 
-        if (target.id === 'clearSelectionButton') {
-            clearSelection();
-        } else if (target.id === 'sendKeysButton') {
-            sendKeys();
-            clearSelection();
-        }
+    clearSelectionButton.addEventListener('click', () => {
+        clearSelection();
+    });
+
+    sendKeysButton.addEventListener('mousedown', () => {
+        sendKeys();
+    });
+
+    sendKeysButton.addEventListener('mouseup', () => {
+        clearSelection();
+        electronAPI.sendKeyboardEvent(0, []); 
     });
 
     function clearSelection() {
         selectedKeys.length = 0; // Clear the array
+        keyListToSend = []; // 清空待发送的键列表
+        modifiers = 0; // 清空修饰键
         updateSelectedKeysDisplay();
     }
 
     function sendKeys() {
-        console.log('Sending keys:', selectedKeys.join('+'));
-        // Add your method to send keys to the client machine
+        console.log('Sending keys:', keyListToSend.join(', '));
+        electronAPI.sendKeyboardEvent(modifiers, keyListToSend); // 发送键列表
     }
 
-
+    // 添加捕获键盘按键的逻辑
+    document.addEventListener('keydown', (event) => {
+        if (selectedKeys.length > 0 && !document.pointerLockElement) {
+            const keyCode = HID_USAGE_ID_MAP[event.code];
+            if (keyCode && !keyListToSend.includes(keyCode)) {
+                selectedKeys.push(event.key);
+                keyListToSend.push(keyCode);
+                updateSelectedKeysDisplay();
+                event.preventDefault(); // Prevent default action to avoid unwanted behavior
+            }
+        }
+    });
 
     // No need as the interface is the main Window
     // document.addEventListener('keydown', function(event) {
