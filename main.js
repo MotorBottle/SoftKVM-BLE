@@ -7,8 +7,8 @@ let port;
 
 function createWindow() {
     mainWindow = new BrowserWindow({
-        width: 840,
-        height: 600,
+        width: 530,
+        height: 370,
         webPreferences: {
             preload: path.join(__dirname, 'preload.js'),
             nodeIntegration: false,
@@ -18,7 +18,7 @@ function createWindow() {
 
     mainWindow.loadFile('index.html');
     mainWindow.setMenu(null);
-    mainWindow.webContents.openDevTools();
+    // mainWindow.webContents.openDevTools();
 
     mainWindow.on('closed', () => {
         mainWindow = null;

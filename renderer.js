@@ -248,12 +248,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
     /*-------------------------控制部分---------------------------*/
 
+    let isConnected = false;
+
     // 列出可用的串口
-    electronAPI.listSerialPorts();
+    function listAndConnectSerialPorts() {
+        electronAPI.listSerialPorts();
+    }
 
     // 处理列出串口的回调
     electronAPI.onSerialPortsListed((ports) => {
+        const currentSelection = serialPortSelect.value;
         serialPortSelect.innerHTML = ''; // 清空当前选项
+
         ports.forEach(port => {
             let option = document.createElement('option');
             option.value = port.path;
@@ -261,14 +267,43 @@ document.addEventListener('DOMContentLoaded', () => {
             serialPortSelect.appendChild(option);
         });
 
-        // 默认选择第一个串口并连接
-        if (serialPortSelect.options.length > 0) {
-            serialPortSelect.selectedIndex = 0;
-            const selectedPort = serialPortSelect.value;
-            electronAPI.connectToSerialPort(selectedPort);
-            console.log(`Automatically connecting to ${selectedPort}`);
+        if (ports.length > 0) {
+            if (!isConnected) {
+                // 默认选择第一个串口并连接
+                serialPortSelect.selectedIndex = 0;
+                const selectedPort = serialPortSelect.value;
+                electronAPI.connectToSerialPort(selectedPort);
+                isConnected = true;
+                console.log(`Automatically connecting to ${selectedPort}`);
+            } else {
+                // 如果当前选择的端口仍然在列表中，保持连接
+                if (ports.some(port => port.path === currentSelection)) {
+                    serialPortSelect.value = currentSelection;
+                }
+            }
+        } else {
+            isConnected = false;
         }
     });
+
+    // 当用户选择一个串口时连接到它
+    serialPortSelect.addEventListener('change', () => {
+        const selectedPort = serialPortSelect.value;
+        if (selectedPort) {
+            electronAPI.connectToSerialPort(selectedPort);
+            console.log(`Connecting to ${selectedPort}`);
+        }
+    });
+
+    // 每三秒刷新一次串口设备列表
+    setInterval(() => {
+        if (!document.pointerLockElement) {
+            listAndConnectSerialPorts();
+        }
+    }, 3000);
+
+    // 初始加载串口设备列表
+    listAndConnectSerialPorts();
 
     // 当用户选择一个串口时连接到它
     serialPortSelect.addEventListener('change', () => {
