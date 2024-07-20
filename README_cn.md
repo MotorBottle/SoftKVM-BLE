@@ -24,7 +24,7 @@ SoftKVM-BLE 是一个应用程序，使用户能够通过蓝牙使用键盘和�
 ## 安装
 1. 克隆仓库：
     ```bash
-    git clone https://github.com/YourUsername/SoftKVM-BLE.git
+    git clone https://github.com/MotorBottle/SoftKVM-BLE.git
     ```
 2. 导航到项目目录：
     ```bash

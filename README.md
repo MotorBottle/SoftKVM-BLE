@@ -24,7 +24,7 @@ SoftKVM-BLE is an application that enables users to control another device using
 ## Installation
 1. Clone the repository:
     ```bash
-    git clone https://github.com/YourUsername/SoftKVM-BLE.git
+    git clone https://github.com/MotorBottle/SoftKVM-BLE.git
     ```
 2. Navigate to the project directory:
     ```bash
