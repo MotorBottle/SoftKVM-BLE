@@ -12,6 +12,8 @@ SoftKVM-BLE 是一个应用程序，使用户能够通过蓝牙使用键盘和�
 - 反转滚动方向
 - 自动检测并连接新插入的串行设备
 
+![alt text](image-3.png)
+
 ![alt text](image.png)
 
 ## 前提条件

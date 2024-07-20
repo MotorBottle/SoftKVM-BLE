@@ -12,6 +12,8 @@ SoftKVM-BLE is an application that enables users to control another device using
 - Invert scroll direction
 - Auto-detect and connect to new serial devices when plugged in
 
+![alt text](image-2.png)
+
 ![alt text](image-1.png)
 
 ## Prerequisites
